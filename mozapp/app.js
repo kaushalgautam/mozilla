@@ -4,11 +4,20 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoDB = require('./config')
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
+
+// database control
+var mongoose = require('mongoose');
+mongoose.connect(mongoDB);
+mongoose.Promise = global.Promise;
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'MongoDB connection error: '));
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
