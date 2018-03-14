@@ -1,8 +1,9 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+.sidebar-nav {
+    margin-top: 20px;
+    padding: 0;
+    list-style: none;
 }
 
-a {
-  color: #00B7FF;
+li{
+    margin-bottom: 15px;
 }
