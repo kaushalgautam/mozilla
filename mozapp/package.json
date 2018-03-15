@@ -1,18 +1,23 @@
 {
   "name": "mozapp",
   "version": "0.0.0",
+  "engines": {
+    "node": "6.11.2"
+  },
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "DEBUG=author,book,bookinstance,genre node ./bin/www",
     "devstart": "nodemon ./bin/www"
   },
   "dependencies": {
     "async": "^2.6.0",
     "body-parser": "~1.18.2",
+    "compression": "^1.7.2",
     "cookie-parser": "~1.4.3",
-    "debug": "~2.6.9",
+    "debug": "^2.6.9",
     "express": "~4.15.5",
     "express-validator": "^5.0.3",
+    "helmet": "^3.12.0",
     "moment": "^2.20.1",
     "mongoose": "^5.0.6",
     "morgan": "~1.9.0",

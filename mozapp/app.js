@@ -4,7 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mongoDB = "mongodb://tumbledore:tumbledore@ds121088.mlab.com:21088/projecttracker"
+var compression = require("compression");
+var mongoDB = process.env.MONGODB_URI || "mongodb://tumbledore:tumbledore@ds121088.mlab.com:21088/projecttracker"
+var helmet = require("helmet");
 // var mongoDB = require("./config").database;
 
 var index = require('./routes/index');
@@ -17,7 +19,6 @@ var app = express();
 var mongoose = require('mongoose');
 mongoose.connect(mongoDB, function(err) {
   if(err) throw err;
-  console.log("conn.ready: " + mongoose.connection.readyState);
 });
 mongoose.Promise = global.Promise;
 
@@ -28,6 +29,8 @@ app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico'))); 
+app.use(helmet());
+app.use(compression());
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));

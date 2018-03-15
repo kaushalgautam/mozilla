@@ -4,6 +4,7 @@ var Genre = require('../models/genre');
 var BookInstance = require('../models/bookinstance');
 var mongoose = require('mongoose');
 var async = require('async');
+var debug = require("debug")("book");
 
 const { body,validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
@@ -26,6 +27,7 @@ exports.index = function(req, res, next) {
             Genre.count(callback);
         },
     }, function(err, results) {
+        debug('details error: ' + err);
         res.render('index', { title: 'Local Library Home', error: err, data: results });
     });
 };
@@ -36,6 +38,7 @@ exports.book_list = function(req, res, next) {
     .populate('author')
     .exec(function(err, list_books) {
        if(err) {
+           debug('list error: ' + err);
            return next(err);
        }
        res.render('book_list', {title: 'Book List', book_list: list_books});
@@ -58,6 +61,7 @@ exports.book_detail = function(req, res, next) {
         },
     }, function(err, results) {
             if(err) {
+                debug('details error: ' + err);
                 return next(err); 
             }
             if(results.book == null) {
@@ -82,7 +86,9 @@ exports.book_create_get = function(req, res) {
             Genre.find(callback);
         },
     }, function(err, results) {
-        if(err) {return next(err); }
+        if(err) {
+            debug('create get error: ' + err);
+            return next(err); }
         res.render('book_form',  {title: 'Create Book', authors: results.authors, genres: results.genres});
     })
 };
@@ -128,7 +134,6 @@ exports.book_create_post = [
       });
       
       if(!errors.isEmpty()) {
-          console.log('haha');
           // there are errors, render again with sanitized values
           
           // get all authors and genres for form
@@ -141,6 +146,7 @@ exports.book_create_post = [
               }
           }, function(err, results){
               if(err) {
+                  debug('create post error: ' + err);
                   return next(err); 
               }
               // Mark our selected genres as checked.
@@ -149,7 +155,6 @@ exports.book_create_post = [
                       results.genres[i].checked='true';
                   }
               }
-              console.log('haha');
               res.render('book_form', {title: 'Create a book', authors: results.authors, genres: results.genres, book: book, errors: errors.array()});
             });
         return;
@@ -157,7 +162,9 @@ exports.book_create_post = [
       else {
           // Data from the form is valid, save book
           book.save(function(err) {
-            if(err) {return next(err)}
+            if(err) {
+                debug('create post error: ' + err);
+                return next(err)}
             // successful so render
             res.redirect(book.url);    
           });
@@ -175,7 +182,9 @@ exports.book_delete_get = function(req, res, next) {
             BookInstance.find({'book': req.params.id}).exec(callback)
         }
     }, function(err, results) {
-       if(err) {return next(err); }
+       if(err) {
+            debug('delete get error: ' + err);
+            return next(err); }
        if(results.book == null) {
            res.redirect('catalog/books');
        }
@@ -194,7 +203,9 @@ exports.book_delete_post = function(req, res, next) {
             BookInstance.find({'book': req.body.bookid}).exec(callback)
         }
     }, function(err, results) {
-        if(err) { return next(err) }
+        if(err) { 
+            debug('delete post error: ' + err);
+            return next(err) }
         if(results.bookinstances.length > 0) {
             // Book has no bookinstances so  render the same way as for the get
             res.render('book_delete', {title: 'Delete Book', book: results.book, bookinstances: results.bookinstances});
@@ -227,7 +238,9 @@ exports.book_update_get = function(req, res, next) {
             Genre.find(callback);
         },
         }, function(err, results) {
-            if (err) { return next(err); }
+            if (err) { 
+                debug('update get error: ' + err);
+                return next(err); }
             if (results.book==null) { // No results.
                 var err = new Error('Book not found');
                 err.status = 404;
@@ -301,7 +314,9 @@ exports.book_update_post = [
                     Genre.find(callback);
                 },
             }, function(err, results) {
-                if (err) { return next(err); }
+                if (err) { 
+                    debug('update post error: ' + err);
+                    return next(err); }
 
                 // Mark our selected genres as checked.
                 for (let i = 0; i < results.genres.length; i++) {

@@ -3,13 +3,17 @@ var Book = require('../models/book');
 var async = require('async');
 const {body, validationResult} = require('express-validator/check');
 const {sanitizeBody} = require('express-validator/filter');
+var debug = require("debug")("author");
 
 // Display list of all Authors.
-exports.author_list = function(req, res) {
+exports.author_list = function(req, res, next) {
     Author.find()
     .sort([['family_name', 'ascending']])
     .exec(function(err, list_authors) {
-        if(err) { return next(err)}
+        if(err) { 
+            debug('list error: ' + err);
+            return next(err);
+        }
         res.render('author_list', {title: 'Author List', author_list: list_authors});
     });
 };
@@ -25,7 +29,9 @@ exports.author_detail = function(req, res, next) {
             .exec(callback)
         }
     }, function(err, results){
-        if(err) {return next(err); }
+        if(err) {
+            debug('detail error: ' + err);
+            return next(err); }
         if(results.author == null) {
             var err = new Error('Author not found');
             err.status = 404;
@@ -36,7 +42,7 @@ exports.author_detail = function(req, res, next) {
 };
 
 // Display Author create form on GET.
-exports.author_create_get = function(req, res) {
+exports.author_create_get = function(req, res, next) {
     res.render('author_form', {title: 'Create Author'});
 };
 
@@ -94,7 +100,9 @@ exports.author_delete_get = function(req, res, next){
             Book.find({'author': req.params.id}).exec(callback)
         }
     }, function(err, results) {
-       if(err) {return next(err); }
+       if(err) {
+           debug('delete get error: ' + err);
+           return next(err); }
        if(results.author == null) {
            res.redirect('catalog/authors');
        }
@@ -113,7 +121,10 @@ exports.author_delete_post = function(req, res, next) {
             Book.find({'author': req.body.authorid}).exec(callback)
         }
     }, function(err, results) {
-        if(err) { return next(err) }
+        if(err) { 
+            debug('delete post: ' + err);
+            return next(err);
+            }
         if(results.authors_books.length > 0) {
             // Author has books render the same way as for the get route
             res.render('author_delete', {title: 'Delete Author', author: results.author, author_books: results.authors_books});

@@ -3,12 +3,17 @@ var Book = require('../models/book');
 var async = require('async');
 const { body, validationResult } = require('express-validator/check');
 const { sanitizeBody } = require('express-validator/filter');
+var debug = require("debug")("genre");
 
 // Display list of all Genre.
-exports.genre_list = function(req, res) {
+exports.genre_list = function(req, res, next) {
     Genre.find()
     .exec(function(err, list_genre) {
-        if(err) return next(err);
+        if(err) {
+            debug('list error: ' + err);
+            return next(err);
+            
+        }
         res.render('genre_list', {title: 'Genre List', genre_list: list_genre});
     })
 };
@@ -26,14 +31,15 @@ exports.genre_detail = function(req, res, next) {
         },
     }, function(err, result){
         if(err) {
+            debug('detail error: ' + err);
             return next(err);
         }
         else if(result.genre == null) { // No results
             var err = new Error('Genre Not Found');
             err.status = 404;
+            debug('detail post error: ' + err);
             return next(err);
         }
-        console.log(result);
         // Successful, so render
         res.render('genre_detail', {title: 'Genre Details', genre: result.genre, genre_books: result.genre_books})
     }
@@ -75,7 +81,11 @@ exports.genre_create_post = [
             // check if genre with the same name already exists
             Genre.findOne({'name': req.body.name})
             .exec(function(err, found_genre) {
-                if(err) {return next(err); }
+                if(err) {
+                    debug('create post error: ' + err);
+                    return next(err); 
+                    
+                }
                 if(found_genre) {
                     //genre exists, redirect to its detail page
                     res.redirect(found_genre.url);
@@ -103,7 +113,10 @@ exports.genre_delete_get = function(req, res, next) {
             Book.find({'genre': req.params.id}).exec(callback)
         }
     }, function(err, results) {
-       if(err) {return next(err); }
+       if(err) {
+           debug('delete get error: ' + err);
+           return next(err);
+       }
        if(results.genre == null) {
            res.redirect('catalog/genres');
        }
@@ -122,7 +135,10 @@ exports.genre_delete_post = function(req, res, next) {
             Book.find({'genre': req.body.genreid}).exec(callback)
         }
     }, function(err, results) {
-        if(err) { return next(err) }
+        if(err) { 
+            debug('delete post error: ' + err);
+            return next(err) 
+        }
         if(results.books.length > 0) {
             // genre has no books so  render the same way as for the get
             res.render('genre_delete', {title: 'Delete Genre', genre: results.genre, books: results.books});
@@ -130,7 +146,11 @@ exports.genre_delete_post = function(req, res, next) {
         else {
             // Genre has no books so delete the book and redirect to the list page
             Genre.findByIdAndRemove(req.body.genreid, function deleteGenre(err) {
-                if(err) {return next(err)};
+                if(err) {
+                    debug('delete post error: ' + err);
+                    return next(err)
+                    
+                };
                 // success - go to the author page: 
                 res.redirect('/catalog/genres');
             })
