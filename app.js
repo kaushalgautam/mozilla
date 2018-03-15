@@ -10,6 +10,7 @@ var helmet = require("helmet");
 // var mongoDB = require("./config").database;
 
 var index = require('./routes/index');
+var api = require('./routes/api');
 var users = require('./routes/users');
 var catalog = require('./routes/catalog'); //import routes for the catalog area of the site
 
@@ -38,6 +39,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
+app.use('/api', api)
 app.use('/users', users);
 app.use('/catalog', catalog);
 
